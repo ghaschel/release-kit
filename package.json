@@ -22,7 +22,7 @@
     "type": "git",
     "url": "git+https://github.com/ghaschel/release-kit.git"
   },
-  "author": "",
+  "author": "Guilherme Haschel",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ghaschel/release-kit/issues"
