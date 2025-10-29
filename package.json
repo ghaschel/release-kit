@@ -13,10 +13,11 @@
     "dev": "tsx bin/cli.ts",
     "build": "tsc",
     "start": "node dist/bin/cli.js",
-    "prepare": "husky install",
+    "prepare": "husky init",
     "prepublishOnly": "pnpm build",
     "release": "commit-and-tag-version",
-    "push": "git push --follow-tags"
+    "push": "git push --follow-tags",
+    "publish": "npm publish"
   },
   "repository": {
     "type": "git",
