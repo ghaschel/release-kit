@@ -116,7 +116,6 @@ export const initCommand = new Command("init")
 
       pkgJson.scripts = {
         ...pkgJson.scripts,
-        prepare: "husky install",
         release: "commit-and-tag-version",
         push: "git push --follow-tags",
       };
