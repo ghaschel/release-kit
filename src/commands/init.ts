@@ -59,13 +59,20 @@ export const initCommand = new Command("init")
     }
 
     // Setup Husky
-    const huskySpinner = ora("Setting up Husky...").start();
-    try {
-      await execa("npx", ["husky", "init"], { stdio: "inherit" });
-      huskySpinner.succeed("Husky initialized!");
-    } catch (err) {
-      huskySpinner.fail("Failed to setup Husky");
-      console.error(err);
+    const huskyDir = path.resolve(".husky");
+    const huskyExists = await fs.pathExists(huskyDir);
+
+    if (huskyExists) {
+      console.log(chalk.yellow("⚠️  Husky already initialized, skipping..."));
+    } else {
+      const huskySpinner = ora("Setting up Husky...").start();
+      try {
+        await execa("npx", ["husky", "init"], { stdio: "inherit" });
+        huskySpinner.succeed("Husky initialized!");
+      } catch (err) {
+        huskySpinner.fail("Failed to setup Husky");
+        console.error(err);
+      }
     }
 
     // Initialize commitizen
