@@ -1,9 +1,3 @@
-# Changelog
+# Changelog Index
 
-
-## 1.1.0 (2025-10-29)
-
-
-### Features
-
-* **first-version:** first initial working version ([a2d98f4](https://github.com/ghaschel/release-kit/commit/a2d98f4c34cfcb0f6ecf137ce60980b0a57ac21b))
+- [1.1.1](./changelogs/1.1.1.md)
