@@ -1,0 +1,60 @@
+{
+  "name": "release-kit",
+  "version": "1.0.0",
+  "description": "A script to automate your release automation ",
+  "main": "dist/index.js",
+  "bin": {
+    "release-kit": "dist/bin/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx bin/cli.ts",
+    "build": "tsc",
+    "start": "node dist/bin/cli.js",
+    "prepare": "husky install",
+    "prepublishOnly": "pnpm build",
+    "release": "commit-and-tag-version",
+    "push": "git push --follow-tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ghaschel/release-kit.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ghaschel/release-kit/issues"
+  },
+  "homepage": "https://github.com/ghaschel/release-kit#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.9",
+    "@types/node": "^24.9.2",
+    "commit-and-tag-version": "^12.6.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
+    "remark": "^15.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "execa": "^9.6.0",
+    "fs-extra": "^11.3.2",
+    "inquirer": "^12.10.0",
+    "ora": "^9.0.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
