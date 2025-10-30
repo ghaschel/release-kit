@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "dev": "tsx bin/cli.ts",
-    "build": "tsc",
+    "build": "tsc && pnpm copy:templates",
+    "copy:templates": "cp -r templates dist/",
     "start": "node dist/bin/cli.js",
     "prepublishOnly": "pnpm build",
     "release": "commit-and-tag-version",

@@ -96,7 +96,8 @@ export const initCommand = new Command("init")
     }
 
     // Copy templates
-    const templatesDir = path.join(process.cwd(), "templates"); // adjust if needed
+    // In production, __dirname will be dist/src/commands, templates is at dist/templates
+    const templatesDir = path.join(__dirname, "../../templates");
     const copySpinner = ora("Copying template files...").start();
     try {
       await fs.copy(templatesDir, process.cwd(), { overwrite: false });
