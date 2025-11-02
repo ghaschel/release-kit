@@ -16,8 +16,7 @@
     "start": "node dist/bin/cli.js",
     "prepublishOnly": "pnpm build",
     "release": "commit-and-tag-version",
-    "push": "git push --follow-tags",
-    "publish": "npm publish"
+    "push": "git push --follow-tags"
   },
   "repository": {
     "type": "git",

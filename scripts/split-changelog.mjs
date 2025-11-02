@@ -50,6 +50,13 @@ for (const node of tree.children) {
     continue;
   }
 
+  // Stop processing if we hit another depth-1 heading (like "Changelog Index")
+  // This prevents old index content from being included in version files
+  if (node.type === "heading" && node.depth === 1 && mainHeader) {
+    // We've hit another h1 heading - stop collecting version sections
+    break;
+  }
+
   // Check if this is a version heading (depth 2 with link containing version)
   if (node.type === "heading" && node.depth === 2) {
     const firstChild = node.children[0];
