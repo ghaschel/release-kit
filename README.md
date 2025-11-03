@@ -1,11 +1,11 @@
-# release-kit
+# release-it-please
 
 A script to automate your release automation
 
 ## How to use
 
 ```bash
-npx release-kit init
+npx release-it-please init
 ```
 
 ## Known issues

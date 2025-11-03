@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { initCommand } from "../src/commands/init";
+import { updateCommand } from "../src/commands/update";
 import packageJson from "../package.json";
 
 const program = new Command();
@@ -11,5 +12,6 @@ program
   .version(packageJson.version);
 
 program.addCommand(initCommand);
+program.addCommand(updateCommand);
 
 program.parse();

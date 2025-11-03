@@ -4,7 +4,7 @@
   "description": "A script to automate your release automation ",
   "main": "dist/index.js",
   "bin": {
-    "release-kit": "dist/bin/cli.js"
+    "release-it-please": "dist/bin/cli.js"
   },
   "files": [
     "dist"
@@ -20,14 +20,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ghaschel/release-kit.git"
+    "url": "git+https://github.com/ghaschel/release-it-please.git"
   },
   "author": "Guilherme Haschel",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ghaschel/release-kit/issues"
+    "url": "https://github.com/ghaschel/release-it-please/issues"
   },
-  "homepage": "https://github.com/ghaschel/release-kit#readme",
+  "homepage": "https://github.com/ghaschel/release-it-please#readme",
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
