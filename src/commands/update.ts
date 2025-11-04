@@ -3,6 +3,11 @@ import ora from "ora";
 import chalk from "chalk";
 import fs from "fs-extra";
 import path from "path";
+import {
+  detectPrettierMethod,
+  findExistingEslintConfig,
+  getTemplateEslintConfigName,
+} from "./utils/checker";
 
 export const updateCommand = new Command("update")
   .description("Update template files (scripts, configs) to the latest version")
@@ -12,12 +17,71 @@ export const updateCommand = new Command("update")
       chalk.yellow("⚠️  Update mode: template files will be overwritten!\n")
     );
 
-    // Copy templates
-    // In production, __dirname will be dist/src/commands, templates is at dist/templates
     const templatesDir = path.join(__dirname, "../../templates");
     const copySpinner = ora("Updating template files...").start();
+
     try {
-      await fs.copy(templatesDir, process.cwd(), { overwrite: true });
+      // Detect current prettier method
+      const prettierMethod = await detectPrettierMethod();
+
+      // Copy base template files (commitlint, versionrc)
+      await fs.copy(
+        path.join(templatesDir, "commitlint.config.js"),
+        path.join(process.cwd(), "commitlint.config.js"),
+        { overwrite: true }
+      );
+
+      await fs.copy(
+        path.join(templatesDir, ".versionrc.js"),
+        path.join(process.cwd(), ".versionrc.js"),
+        { overwrite: true }
+      );
+
+      // Copy scripts directory if it exists
+      const scriptsDir = path.join(templatesDir, "scripts");
+      if (await fs.pathExists(scriptsDir)) {
+        await fs.copy(scriptsDir, path.join(process.cwd(), "scripts"), {
+          overwrite: true,
+        });
+      }
+
+      // Copy lint-staged config only if user has one
+      if (prettierMethod) {
+        const sourceFile = `.lintstagedrc.${prettierMethod}.json`;
+        const sourcePath = path.join(templatesDir, sourceFile);
+        const targetPath = path.join(process.cwd(), ".lintstagedrc.json");
+
+        await fs.copy(sourcePath, targetPath, { overwrite: true });
+        copySpinner.info(
+          `Lint-staged config updated (using ${prettierMethod} method)`
+        );
+      }
+
+      // Copy prettier config if it exists locally
+      if (await fs.pathExists(path.join(process.cwd(), ".prettierrc"))) {
+        await fs.copy(
+          path.join(templatesDir, ".prettierrc"),
+          path.join(process.cwd(), ".prettierrc"),
+          { overwrite: true }
+        );
+      }
+
+      // Copy ESLint config only if user has our template config
+      const existingEslintConfig = await findExistingEslintConfig();
+      const templateEslintName = getTemplateEslintConfigName();
+
+      if (existingEslintConfig === templateEslintName) {
+        await fs.copy(
+          path.join(templatesDir, templateEslintName),
+          path.join(process.cwd(), templateEslintName),
+          { overwrite: true }
+        );
+      } else if (existingEslintConfig) {
+        copySpinner.info(
+          `Skipping ESLint config update (using ${existingEslintConfig})`
+        );
+      }
+
       copySpinner.succeed("Template files updated!");
     } catch (err) {
       copySpinner.fail("Failed to update template files");

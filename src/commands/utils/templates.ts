@@ -2,10 +2,18 @@ import ora from "ora";
 import chalk from "chalk";
 import fs from "fs-extra";
 import path from "path";
-import { areTemplateFilesInstalled } from "./checker";
+import type { PrettierMethod } from "../../types";
+import { 
+  areTemplateFilesInstalled, 
+  findExistingEslintConfig, 
+  getTemplateEslintConfigName,
+  shouldSkipEslintSetup 
+} from "./checker";
 
 export async function copyTemplateFiles(
   useSplitChangelog: boolean,
+  useLintStaged: boolean,
+  prettierMethod: PrettierMethod | null,
   force: boolean
 ): Promise<void> {
   const templatesDir = path.join(__dirname, "../../../templates");
@@ -23,20 +31,91 @@ export async function copyTemplateFiles(
   const copySpinner = ora("Copying template files...").start();
   
   try {
-    await fs.copy(templatesDir, process.cwd(), { overwrite: force });
+    // Copy base files (commitlint config, versionrc)
+    await fs.copy(
+      path.join(templatesDir, "commitlint.config.js"),
+      path.join(process.cwd(), "commitlint.config.js"),
+      { overwrite: force }
+    );
+    
+    await fs.copy(
+      path.join(templatesDir, ".versionrc.js"),
+      path.join(process.cwd(), ".versionrc.js"),
+      { overwrite: force }
+    );
 
-    // If not using split changelog, remove scripts and update .versionrc.js
-    if (!useSplitChangelog) {
+    // Copy split changelog scripts if enabled
+    if (useSplitChangelog) {
+      await fs.copy(
+        path.join(templatesDir, "scripts"),
+        path.join(process.cwd(), "scripts"),
+        { overwrite: force }
+      );
+    } else {
       await removeSpitChangelogFiles();
     }
 
-    copySpinner.succeed("Scripts, commitlint config and versionrc copied!");
+    // Copy lint-staged config if enabled
+    if (useLintStaged && prettierMethod) {
+      await copyLintStagedConfig(prettierMethod, force);
+      await copyPrettierConfig(force);
+      await copyEslintConfig(force);
+    }
+
+    copySpinner.succeed("Template files copied!");
   } catch (err) {
-    copySpinner.fail(
-      "Failed to copy scripts, commitlint config and versionrc"
-    );
+    copySpinner.fail("Failed to copy template files");
     console.error(err);
   }
+}
+
+async function copyLintStagedConfig(
+  prettierMethod: PrettierMethod,
+  force: boolean
+): Promise<void> {
+  const templatesDir = path.join(__dirname, "../../../templates");
+  const sourceFile = `.lintstagedrc.${prettierMethod}.json`;
+  const targetFile = ".lintstagedrc.json";
+  
+  const sourcePath = path.join(templatesDir, sourceFile);
+  const targetPath = path.join(process.cwd(), targetFile);
+  
+  await fs.copy(sourcePath, targetPath, { overwrite: force });
+}
+
+async function copyPrettierConfig(force: boolean): Promise<void> {
+  const templatesDir = path.join(__dirname, "../../../templates");
+  const sourcePath = path.join(templatesDir, ".prettierrc");
+  const targetPath = path.join(process.cwd(), ".prettierrc");
+  
+  await fs.copy(sourcePath, targetPath, { overwrite: force });
+}
+
+async function copyEslintConfig(force: boolean): Promise<void> {
+  const existingConfig = await findExistingEslintConfig();
+  const templateName = getTemplateEslintConfigName();
+  
+  // Only copy if:
+  // 1. No existing config, OR
+  // 2. Force mode AND existing config matches our template name
+  const shouldCopy = !existingConfig || (force && existingConfig === templateName);
+  
+  if (!shouldCopy) {
+    if (existingConfig && existingConfig !== templateName) {
+      console.log(
+        chalk.yellow(
+          `⚠️  Existing ESLint config found (${existingConfig}), skipping ESLint template copy.`
+        )
+      );
+    }
+    return;
+  }
+  
+  const templatesDir = path.join(__dirname, "../../../templates");
+  const sourcePath = path.join(templatesDir, templateName);
+  const targetPath = path.join(process.cwd(), templateName);
+  
+  await fs.copy(sourcePath, targetPath, { overwrite: force });
 }
 
 async function removeSpitChangelogFiles(): Promise<void> {

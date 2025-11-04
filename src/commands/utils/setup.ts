@@ -5,7 +5,10 @@ import fs from "fs-extra";
 import path from "path";
 import type { PackageManager, PackageJson } from "../../types";
 
-export async function setupHusky(force: boolean): Promise<void> {
+export async function setupHusky(
+  useLintStaged: boolean,
+  force: boolean
+): Promise<void> {
   const huskyDir = path.resolve(".husky");
   const huskyExists = await fs.pathExists(huskyDir);
 
@@ -26,6 +29,18 @@ export async function setupHusky(force: boolean): Promise<void> {
   
   try {
     await execa("npx", ["husky", "init"], { stdio: "inherit" });
+    
+    // Update pre-commit hook
+    const preCommitPath = path.join(huskyDir, "pre-commit");
+    let preCommitContent = "# Pre-commit hook\n";
+    
+    if (useLintStaged) {
+      preCommitContent += "npx lint-staged\n";
+    }
+    
+    await fs.writeFile(preCommitPath, preCommitContent);
+    await fs.chmod(preCommitPath, 0o755); // Make executable
+    
     huskySpinner.succeed("Husky initialized!");
   } catch (err) {
     huskySpinner.fail("Failed to setup Husky");

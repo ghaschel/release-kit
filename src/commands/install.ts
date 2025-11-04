@@ -2,7 +2,10 @@ import { Command } from "commander";
 import chalk from "chalk";
 import type { InstallOptions } from "../types";
 import { gatherInstallConfig } from "./utils/prompts";
-import { getGlobalDependencies, installGlobalDependencies } from "./utils/installers";
+import {
+  getGlobalDependencies,
+  installGlobalDependencies,
+} from "./utils/installers";
 
 export const installCommand = new Command("install")
   .description("Install global dependencies (commitizen)")
@@ -20,7 +23,7 @@ async function runInstall(options: InstallOptions): Promise<void> {
 
   // Display welcome message
   console.log(chalk.cyan("\n📦 Installing global dependencies...\n"));
-  
+
   if (force) {
     console.log(
       chalk.yellow(
@@ -44,9 +47,6 @@ async function runInstall(options: InstallOptions): Promise<void> {
 
   // Display success message
   console.log(
-    chalk.greenBright(
-      "\n🎉 Global dependencies installed successfully!\n"
-    )
+    chalk.greenBright("\n🎉 Global dependencies installed successfully!\n")
   );
 }
-

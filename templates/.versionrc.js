@@ -1,5 +1,3 @@
-const path = require("path");
-
 module.exports = {
   skip: { tag: false },
   infile: "CHANGELOG.md",

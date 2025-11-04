@@ -1,14 +1,19 @@
 export type PackageManager = "npm" | "yarn" | "pnpm";
+export type PrettierMethod = "eslint" | "pretty-quick";
 
 export interface InitOptions {
   force?: boolean;
   packageManager?: string;
   splitChangelog?: boolean;
+  lintStaged?: boolean;
+  prettierMethod?: string;
 }
 
 export interface InitConfig {
   packageManager: PackageManager;
   useSplitChangelog: boolean;
+  useLintStaged: boolean;
+  prettierMethod: PrettierMethod | null;
   force: boolean;
 }
 

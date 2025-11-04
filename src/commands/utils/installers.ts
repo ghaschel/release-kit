@@ -27,6 +27,29 @@ export function getGlobalDependencies(): string[] {
   return ["commitizen"];
 }
 
+export function getEslintDependencies(): string[] {
+  return [
+    "eslint",
+    "@eslint/js",
+    "typescript-eslint",
+    "eslint-config-prettier",
+  ];
+}
+
+export function getPrettierDependencies(method: "eslint" | "pretty-quick"): string[] {
+  const baseDeps = ["prettier"];
+  
+  if (method === "pretty-quick") {
+    return [...baseDeps, "pretty-quick"];
+  }
+  
+  return baseDeps;
+}
+
+export function getLintStagedDependencies(): string[] {
+  return ["lint-staged"];
+}
+
 export async function installDevDependencies(
   packageManager: PackageManager,
   dependencies: string[],
