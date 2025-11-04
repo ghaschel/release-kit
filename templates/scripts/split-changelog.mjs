@@ -182,10 +182,11 @@ console.log(
   `📝 Updated ${infile} with index of ${files.length} total version(s)\n`
 );
 
-// --- Stage files to be included in the release commit ---
+// --- Amend the release commit to include split changelog files ---
 try {
   execSync(`git add ${changelogsDir} ${changelogPath}`);
-  console.log(`✅ Staged split changelog files for release commit.`);
+  execSync(`git commit --amend --no-edit --no-verify`);
+  console.log(`✅ Amended release commit to include split changelog files.`);
 } catch (err) {
-  console.error("⚠️  Failed to stage files:", err.message);
+  console.error("⚠️  Failed to amend commit:", err.message);
 }
