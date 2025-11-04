@@ -23,6 +23,10 @@ export function getRemarkDependencies(): string[] {
   return ["remark", "remark-parse", "remark-stringify"];
 }
 
+export function getGlobalDependencies(): string[] {
+  return ["commitizen"];
+}
+
 export async function installDevDependencies(
   packageManager: PackageManager,
   dependencies: string[],

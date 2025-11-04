@@ -1,5 +1,5 @@
 import inquirer from "inquirer";
-import type { PackageManager, InitOptions, InitConfig } from "../../types";
+import type { PackageManager, InitOptions, InitConfig, InstallOptions, InstallConfig } from "../../types";
 import { validatePackageManager } from "./validation";
 
 interface PromptAnswers {
@@ -43,6 +43,35 @@ export async function gatherInitConfig(options: InitOptions): Promise<InitConfig
   return {
     packageManager: validatedPm || answers.packageManager!,
     useSplitChangelog: splitOption !== undefined ? splitOption : (answers.useSplitChangelog ?? true),
+    force,
+  };
+}
+
+export async function gatherInstallConfig(options: InstallOptions): Promise<InstallConfig> {
+  const { force = false, packageManager: pmOption } = options;
+
+  // Validate package manager if provided
+  const validatedPm = validatePackageManager(pmOption);
+
+  // Build prompts for missing options
+  const prompts: any[] = [];
+
+  if (!validatedPm) {
+    prompts.push({
+      type: "list",
+      name: "packageManager",
+      message: "Which package manager do you use?",
+      choices: ["pnpm", "npm", "yarn"],
+    });
+  }
+
+  // Prompt for missing options
+  const answers: { packageManager?: PackageManager } = prompts.length > 0
+    ? await inquirer.prompt(prompts)
+    : {};
+
+  return {
+    packageManager: validatedPm || answers.packageManager!,
     force,
   };
 }
