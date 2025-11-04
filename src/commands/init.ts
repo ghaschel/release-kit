@@ -5,6 +5,7 @@ import { gatherInitConfig } from "./utils/prompts";
 import {
   getBaseDependencies,
   getRemarkDependencies,
+  getGlobalDependencies,
   installDevDependencies,
   installGlobalDependencies,
 } from "./utils/installers";
@@ -57,9 +58,10 @@ async function runInit(options: InitOptions): Promise<void> {
   );
 
   // Install global dependencies
+  const globalDeps = getGlobalDependencies();
   await installGlobalDependencies(
     config.packageManager,
-    ["commitizen"],
+    globalDeps,
     config.force
   );
 

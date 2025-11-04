@@ -12,6 +12,16 @@ export interface InitConfig {
   force: boolean;
 }
 
+export interface InstallOptions {
+  force?: boolean;
+  packageManager?: string;
+}
+
+export interface InstallConfig {
+  packageManager: PackageManager;
+  force: boolean;
+}
+
 export interface PackageJson {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
