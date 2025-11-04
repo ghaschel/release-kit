@@ -1,8 +1,9 @@
-import { execa } from "execa";
-import ora from "ora";
 import chalk from "chalk";
+import { execa } from "execa";
 import fs from "fs-extra";
+import ora from "ora";
 import path from "path";
+
 import type { PackageJson } from "../../types";
 
 export async function setupHusky(
@@ -40,6 +41,13 @@ export async function setupHusky(
 
     await fs.writeFile(preCommitPath, preCommitContent);
     await fs.chmod(preCommitPath, 0o755); // Make executable
+
+    // Create commit-msg hook for commitlint
+    const commitMsgPath = path.join(huskyDir, "commit-msg");
+    const commitMsgContent = "npx --no -- commitlint --edit $1\n";
+
+    await fs.writeFile(commitMsgPath, commitMsgContent);
+    await fs.chmod(commitMsgPath, 0o755); // Make executable
 
     huskySpinner.succeed("Husky initialized!");
   } catch (err) {

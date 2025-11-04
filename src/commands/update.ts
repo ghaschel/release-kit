@@ -1,8 +1,9 @@
-import { Command } from "commander";
-import ora from "ora";
 import chalk from "chalk";
+import { Command } from "commander";
 import fs from "fs-extra";
+import ora from "ora";
 import path from "path";
+
 import {
   detectPrettierMethod,
   findExistingEslintConfig,
@@ -80,6 +81,20 @@ export const updateCommand = new Command("update")
         copySpinner.info(
           `Skipping ESLint config update (using ${existingEslintConfig})`
         );
+      }
+
+      // Update Husky hooks if .husky directory exists
+      const huskyDir = path.join(process.cwd(), ".husky");
+      if (await fs.pathExists(huskyDir)) {
+        copySpinner.info("Updating Husky hooks...");
+
+        // Update commit-msg hook
+        const commitMsgPath = path.join(huskyDir, "commit-msg");
+        const commitMsgContent = "npx --no -- commitlint --edit $1\n";
+        await fs.writeFile(commitMsgPath, commitMsgContent);
+        await fs.chmod(commitMsgPath, 0o755);
+
+        copySpinner.info("Husky hooks updated!");
       }
 
       copySpinner.succeed("Template files updated!");
