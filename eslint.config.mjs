@@ -44,9 +44,9 @@ export default [
     ignores: [
       "dist/**",
       "node_modules/**",
+      ".versionrc.js",
       "*.config.js",
       "*.config.mjs",
-      ".versionrc.js",
       "scripts/split-changelog.mjs",
       "scripts/custom-tag-message.mjs",
       "templates/**",
