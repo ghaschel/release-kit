@@ -1,2 +1,2 @@
-
-pnpm build
+# Pre-commit hook
+npx lint-staged

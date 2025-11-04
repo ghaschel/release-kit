@@ -12,10 +12,10 @@ export function getInstallCommand(pm: PackageManager): string {
 export function getBaseDependencies(): string[] {
   return [
     "husky",
-    "lint-staged",
     "@commitlint/config-conventional",
     "@commitlint/cli",
     "commit-and-tag-version",
+    "cz-git",
   ];
 }
 

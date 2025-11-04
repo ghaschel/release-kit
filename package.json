@@ -16,7 +16,8 @@
     "start": "node dist/bin/cli.js",
     "prepublishOnly": "pnpm build",
     "release": "commit-and-tag-version",
-    "push": "git push --follow-tags"
+    "push": "git push --follow-tags",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -36,7 +37,7 @@
     "@types/inquirer": "^9.0.9",
     "@types/node": "^24.9.2",
     "commit-and-tag-version": "^12.6.0",
-    "cz-conventional-changelog": "^3.3.0",
+    "cz-git": "^1.11.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
@@ -59,7 +60,7 @@
   },
   "config": {
     "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
+      "path": "node_modules/cz-git"
     }
   }
 }

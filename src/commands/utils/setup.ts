@@ -3,7 +3,7 @@ import ora from "ora";
 import chalk from "chalk";
 import fs from "fs-extra";
 import path from "path";
-import type { PackageManager, PackageJson } from "../../types";
+import type { PackageJson } from "../../types";
 
 export async function setupHusky(
   useLintStaged: boolean,
@@ -26,21 +26,21 @@ export async function setupHusky(
   }
 
   const huskySpinner = ora("Setting up Husky...").start();
-  
+
   try {
     await execa("npx", ["husky", "init"], { stdio: "inherit" });
-    
+
     // Update pre-commit hook
     const preCommitPath = path.join(huskyDir, "pre-commit");
     let preCommitContent = "# Pre-commit hook\n";
-    
+
     if (useLintStaged) {
       preCommitContent += "npx lint-staged\n";
     }
-    
+
     await fs.writeFile(preCommitPath, preCommitContent);
     await fs.chmod(preCommitPath, 0o755); // Make executable
-    
+
     huskySpinner.succeed("Husky initialized!");
   } catch (err) {
     huskySpinner.fail("Failed to setup Husky");
@@ -49,7 +49,6 @@ export async function setupHusky(
 }
 
 export async function setupCommitizen(
-  packageManager: PackageManager,
   pkgJson: PackageJson,
   force: boolean
 ): Promise<void> {
@@ -58,32 +57,34 @@ export async function setupCommitizen(
   if (!force && commitizenConfigExists) {
     console.log(
       chalk.yellow(
-        "⚠️  Commitizen already initialized, skipping. Use `--force` to overwrite it."
+        "⚠️  Commitizen already configured, skipping. Use `--force` to overwrite it."
       )
     );
     return;
   }
 
-  const commitizenSpinner = ora("Initializing commitizen...").start();
-  
+  const commitizenSpinner = ora(
+    "Configuring commitizen with cz-git..."
+  ).start();
+
   try {
-    const commitizenArgs = [
-      "init",
-      "cz-conventional-changelog",
-      `--${packageManager}`,
-      "--save-dev",
-      "--save-exact",
-    ];
-    
-    if (force) {
-      commitizenArgs.push("--force");
+    // Update package.json with cz-git path
+    const pkgPath = path.resolve("package.json");
+    const updatedPkgJson = await fs.readJson(pkgPath);
+
+    if (!updatedPkgJson.config) {
+      updatedPkgJson.config = {};
     }
-    
-    await execa("commitizen", commitizenArgs, { stdio: "inherit" });
-    commitizenSpinner.succeed("Commitizen initialized!");
+
+    updatedPkgJson.config.commitizen = {
+      path: "node_modules/cz-git",
+    };
+
+    await fs.writeJson(pkgPath, updatedPkgJson, { spaces: 2 });
+
+    commitizenSpinner.succeed("Commitizen configured with cz-git!");
   } catch (err) {
-    commitizenSpinner.fail("Failed to initialize commitizen");
+    commitizenSpinner.fail("Failed to configure commitizen");
     console.error(err);
   }
 }
-

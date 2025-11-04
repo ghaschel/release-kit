@@ -13,7 +13,11 @@ import {
   installGlobalDependencies,
 } from "./utils/installers";
 import { setupHusky, setupCommitizen } from "./utils/setup";
-import { copyTemplateFiles, updatePackageJsonScripts } from "./utils/templates";
+import { 
+  copyTemplateFiles, 
+  updatePackageJsonScripts,
+  updateVersionrcWithIssueTracker
+} from "./utils/templates";
 import { readPackageJson, shouldSkipEslintSetup } from "./utils/checker";
 
 export const initCommand = new Command("init")
@@ -42,6 +46,14 @@ export const initCommand = new Command("init")
   .option(
     "--prettier-method <method>",
     "How to format code with Prettier (eslint or pretty-quick)"
+  )
+  .option(
+    "--issue-url-format <format>",
+    "Custom issue tracker URL format (e.g., https://linear.app/team/issue/{{prefix}}{{id}})"
+  )
+  .option(
+    "--issue-prefix <prefix>",
+    "Custom issue prefix (e.g., PROJ-, TEAM-)"
   )
   .action(async (options: InitOptions) => {
     await runInit(options);
@@ -107,7 +119,7 @@ async function runInit(options: InitOptions): Promise<void> {
   await setupHusky(config.useLintStaged, config.force);
 
   // Setup Commitizen
-  await setupCommitizen(config.packageManager, pkgJson, config.force);
+  await setupCommitizen(pkgJson, config.force);
 
   // Copy template files
   await copyTemplateFiles(
@@ -116,6 +128,15 @@ async function runInit(options: InitOptions): Promise<void> {
     config.prettierMethod,
     config.force
   );
+
+  // Update .versionrc.js with issue tracker config if provided
+  if (config.issuePrefix || config.issueUrlFormat) {
+    await updateVersionrcWithIssueTracker(
+      config.issuePrefix,
+      config.issueUrlFormat,
+      config.force
+    );
+  }
 
   // Update package.json scripts
   await updatePackageJsonScripts(config.force);

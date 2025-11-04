@@ -3,11 +3,10 @@ import chalk from "chalk";
 import fs from "fs-extra";
 import path from "path";
 import type { PrettierMethod } from "../../types";
-import { 
-  areTemplateFilesInstalled, 
-  findExistingEslintConfig, 
+import {
+  areTemplateFilesInstalled,
+  findExistingEslintConfig,
   getTemplateEslintConfigName,
-  shouldSkipEslintSetup 
 } from "./checker";
 
 export async function copyTemplateFiles(
@@ -29,7 +28,7 @@ export async function copyTemplateFiles(
   }
 
   const copySpinner = ora("Copying template files...").start();
-  
+
   try {
     // Copy base files (commitlint config, versionrc)
     await fs.copy(
@@ -37,7 +36,7 @@ export async function copyTemplateFiles(
       path.join(process.cwd(), "commitlint.config.js"),
       { overwrite: force }
     );
-    
+
     await fs.copy(
       path.join(templatesDir, ".versionrc.js"),
       path.join(process.cwd(), ".versionrc.js"),
@@ -76,10 +75,10 @@ async function copyLintStagedConfig(
   const templatesDir = path.join(__dirname, "../../../templates");
   const sourceFile = `.lintstagedrc.${prettierMethod}.json`;
   const targetFile = ".lintstagedrc.json";
-  
+
   const sourcePath = path.join(templatesDir, sourceFile);
   const targetPath = path.join(process.cwd(), targetFile);
-  
+
   await fs.copy(sourcePath, targetPath, { overwrite: force });
 }
 
@@ -87,19 +86,20 @@ async function copyPrettierConfig(force: boolean): Promise<void> {
   const templatesDir = path.join(__dirname, "../../../templates");
   const sourcePath = path.join(templatesDir, ".prettierrc");
   const targetPath = path.join(process.cwd(), ".prettierrc");
-  
+
   await fs.copy(sourcePath, targetPath, { overwrite: force });
 }
 
 async function copyEslintConfig(force: boolean): Promise<void> {
   const existingConfig = await findExistingEslintConfig();
   const templateName = getTemplateEslintConfigName();
-  
+
   // Only copy if:
   // 1. No existing config, OR
   // 2. Force mode AND existing config matches our template name
-  const shouldCopy = !existingConfig || (force && existingConfig === templateName);
-  
+  const shouldCopy =
+    !existingConfig || (force && existingConfig === templateName);
+
   if (!shouldCopy) {
     if (existingConfig && existingConfig !== templateName) {
       console.log(
@@ -110,11 +110,11 @@ async function copyEslintConfig(force: boolean): Promise<void> {
     }
     return;
   }
-  
+
   const templatesDir = path.join(__dirname, "../../../templates");
   const sourcePath = path.join(templatesDir, templateName);
   const targetPath = path.join(process.cwd(), templateName);
-  
+
   await fs.copy(sourcePath, targetPath, { overwrite: force });
 }
 
@@ -162,7 +162,7 @@ export async function updatePackageJsonScripts(force: boolean): Promise<void> {
   }
 
   const pkgSpinner = ora("Updating package.json scripts...").start();
-  
+
   try {
     updatedPkgJson.scripts = {
       ...existingScripts,
@@ -177,3 +177,68 @@ export async function updatePackageJsonScripts(force: boolean): Promise<void> {
   }
 }
 
+export async function updateVersionrcWithIssueTracker(
+  issuePrefix: string | null,
+  issueUrlFormat: string | null,
+  _force: boolean
+): Promise<void> {
+  const versionrcPath = path.resolve(".versionrc.js");
+
+  if (!(await fs.pathExists(versionrcPath))) {
+    console.log(
+      chalk.yellow(
+        "⚠️  .versionrc.js not found, skipping issue tracker configuration."
+      )
+    );
+    return;
+  }
+
+  const spinner = ora(
+    "Updating .versionrc.js with issue tracker config..."
+  ).start();
+
+  try {
+    // Read existing versionrc content
+    const content = await fs.readFile(versionrcPath, "utf-8");
+
+    // Parse the module.exports object (simple approach)
+    let updatedContent = content;
+
+    // Add issue tracker configuration
+    if (issuePrefix) {
+      const prefixConfig = `  issuePrefixes: ["${issuePrefix}"],`;
+
+      // Check if issuePrefixes already exists
+      if (content.includes("issuePrefixes:")) {
+        updatedContent = updatedContent.replace(
+          /issuePrefixes:\s*\[.*?\],/,
+          prefixConfig
+        );
+      } else {
+        // Add before the closing brace
+        updatedContent = updatedContent.replace(/};$/m, `${prefixConfig}\n};`);
+      }
+    }
+
+    if (issueUrlFormat) {
+      const urlConfig = `  issueUrlFormat: "${issueUrlFormat}",`;
+
+      // Check if issueUrlFormat already exists
+      if (content.includes("issueUrlFormat:")) {
+        updatedContent = updatedContent.replace(
+          /issueUrlFormat:\s*".*?",/,
+          urlConfig
+        );
+      } else {
+        // Add before the closing brace
+        updatedContent = updatedContent.replace(/};$/m, `${urlConfig}\n};`);
+      }
+    }
+
+    await fs.writeFile(versionrcPath, updatedContent);
+    spinner.succeed("Issue tracker configuration updated in .versionrc.js!");
+  } catch (err) {
+    spinner.fail("Failed to update .versionrc.js with issue tracker config");
+    console.error(err);
+  }
+}

@@ -7,6 +7,8 @@ export interface InitOptions {
   splitChangelog?: boolean;
   lintStaged?: boolean;
   prettierMethod?: string;
+  issueUrlFormat?: string;
+  issuePrefix?: string;
 }
 
 export interface InitConfig {
@@ -14,6 +16,8 @@ export interface InitConfig {
   useSplitChangelog: boolean;
   useLintStaged: boolean;
   prettierMethod: PrettierMethod | null;
+  issueUrlFormat: string | null;
+  issuePrefix: string | null;
   force: boolean;
 }
 
