@@ -1,6 +1,6 @@
 {
   "name": "release-it-please",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "A script to automate your release automation ",
   "main": "dist/index.js",
   "bin": {
