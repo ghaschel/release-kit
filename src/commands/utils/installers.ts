@@ -1,9 +1,10 @@
+import chalk from "chalk";
 import { execa } from "execa";
 import ora from "ora";
-import chalk from "chalk";
+
 import type { PackageManager } from "../../types";
-import { getMissingDependencies, isGloballyInstalled } from "./checker";
 import type { PackageJson } from "../../types";
+import { getMissingDependencies, isGloballyInstalled } from "./checker";
 
 export function getInstallCommand(pm: PackageManager): string {
   return pm === "yarn" ? "add" : "install";
@@ -33,16 +34,21 @@ export function getEslintDependencies(): string[] {
     "@eslint/js",
     "typescript-eslint",
     "eslint-config-prettier",
+    "eslint-plugin-simple-import-sort",
+    "eslint-plugin-unused-imports",
+    "eslint-plugin-prettier",
   ];
 }
 
-export function getPrettierDependencies(method: "eslint" | "pretty-quick"): string[] {
+export function getPrettierDependencies(
+  method: "eslint" | "pretty-quick"
+): string[] {
   const baseDeps = ["prettier"];
-  
+
   if (method === "pretty-quick") {
     return [...baseDeps, "pretty-quick"];
   }
-  
+
   return baseDeps;
 }
 
@@ -70,7 +76,7 @@ export async function installDevDependencies(
 
   const depsToInstall = force ? dependencies : missingDeps;
   const spinner = ora("Installing dev dependencies...").start();
-  
+
   try {
     await execa(packageManager, [installCmd, "-D", ...depsToInstall], {
       stdio: "inherit",
@@ -89,7 +95,7 @@ export async function installGlobalDependencies(
   force: boolean
 ): Promise<void> {
   const installCmd = getInstallCommand(packageManager);
-  
+
   // Check if all global dependencies are installed
   const installationChecks = await Promise.all(
     dependencies.map((dep) => isGloballyInstalled(dep))
@@ -106,7 +112,7 @@ export async function installGlobalDependencies(
   }
 
   const globalDepsSpinner = ora("Installing global dependencies...").start();
-  
+
   try {
     await execa(packageManager, [installCmd, "-g", ...dependencies], {
       stdio: "inherit",
@@ -118,4 +124,3 @@ export async function installGlobalDependencies(
     // Don't exit, continue with the rest
   }
 }
-
