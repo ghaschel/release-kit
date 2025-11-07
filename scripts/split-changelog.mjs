@@ -44,7 +44,6 @@ let current = null;
 let mainHeader = null;
 
 for (const node of tree.children) {
-  // Capture the main "Changelog" header (depth 1)
   if (node.type === "heading" && node.depth === 1 && !mainHeader) {
     mainHeader = node;
     continue;
@@ -61,19 +60,35 @@ for (const node of tree.children) {
   if (node.type === "heading" && node.depth === 2) {
     const firstChild = node.children[0];
     // Check if it's a link with a version number pattern
-    if (
-      firstChild &&
-      firstChild.type === "link" &&
-      firstChild.children &&
-      firstChild.children[0] &&
-      firstChild.children[0].type === "text"
-    ) {
-      const linkText = firstChild.children[0].value;
-      if (/^\d+\.\d+\.\d+$/.test(linkText)) {
-        // Start a new version section
-        if (current) sections.push(current);
-        current = { heading: node, nodes: [], version: linkText };
-        continue;
+
+    if (firstChild) {
+      const regexVersion = new RegExp(/\d+\.\d+\.\d+/);
+
+      if (
+        firstChild.type === "link" &&
+        firstChild.children &&
+        firstChild.children[0] &&
+        firstChild.children[0].type === "text"
+      ) {
+        const linkText = firstChild.children[0].value;
+        const [matched] = linkText.match(regexVersion) ?? [];
+
+        if (matched) {
+          if (current) sections.push(current);
+          current = { heading: node, nodes: [], version: matched };
+
+          continue;
+        }
+      } else if (firstChild.type === "text") {
+        const text = firstChild.value;
+        const [matched] = text.match(regexVersion) ?? [];
+
+        if (matched) {
+          if (current) sections.push(current);
+          current = { heading: node, nodes: [], version: matched };
+
+          continue;
+        }
       }
     }
   }
@@ -184,8 +199,8 @@ console.log(
 
 // --- Amend the release commit to include split changelog files ---
 try {
-  execSync(`git add ${changelogsDir} ${changelogPath}`);
-  execSync(`git commit --amend --no-edit --no-verify`);
+  // execSync(`git add ${changelogsDir} ${changelogPath}`);
+  // execSync(`git commit --amend --no-edit --no-verify`);
   console.log(`✅ Amended release commit to include split changelog files.`);
 } catch (err) {
   console.error("⚠️  Failed to amend commit:", err.message);
