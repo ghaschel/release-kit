@@ -1,3 +1,11 @@
+# Changelog
+
+## [1.6.4](https://github.com/ghaschel/release-it-please/compare/v1.6.3...v1.6.4) (2025-11-07)
+
+### Bug Fixes
+
+- fixed changelog generation ([4762a47](https://github.com/ghaschel/release-it-please/commit/4762a478816049e2c0321ce7a8c432ac0186bc08))
+
 # Changelog Index
 
 - [1.6.3](./changelogs/1.6.3.md)
