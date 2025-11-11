@@ -199,8 +199,8 @@ console.log(
 
 // --- Amend the release commit to include split changelog files ---
 try {
-  // execSync(`git add ${changelogsDir} ${changelogPath}`);
-  // execSync(`git commit --amend --no-edit --no-verify`);
+  execSync(`git add ${changelogsDir} ${changelogPath}`);
+  execSync(`git commit --amend --no-edit --no-verify`);
   console.log(`✅ Amended release commit to include split changelog files.`);
 } catch (err) {
   console.error("⚠️  Failed to amend commit:", err.message);
