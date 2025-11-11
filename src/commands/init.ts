@@ -1,24 +1,25 @@
-import { Command } from "commander";
 import chalk from "chalk";
-import type { InitOptions, InitConfig } from "../types";
-import { gatherInitConfig } from "./utils/prompts";
+import { Command } from "commander";
+
+import type { InitConfig, InitOptions } from "../types";
+import { readPackageJson, shouldSkipEslintSetup } from "./utils/checker";
 import {
   getBaseDependencies,
-  getRemarkDependencies,
-  getGlobalDependencies,
   getEslintDependencies,
-  getPrettierDependencies,
+  getGlobalDependencies,
   getLintStagedDependencies,
+  getPrettierDependencies,
+  getRemarkDependencies,
   installDevDependencies,
   installGlobalDependencies,
 } from "./utils/installers";
-import { setupHusky, setupCommitizen } from "./utils/setup";
-import { 
-  copyTemplateFiles, 
+import { gatherInitConfig } from "./utils/prompts";
+import { setupCommitizen, setupHusky } from "./utils/setup";
+import {
+  copyTemplateFiles,
   updatePackageJsonScripts,
-  updateVersionrcWithIssueTracker
+  updateVersionrcWithIssueTracker,
 } from "./utils/templates";
-import { readPackageJson, shouldSkipEslintSetup } from "./utils/checker";
 
 export const initCommand = new Command("init")
   .description("Initialize your project with release-kit defaults")
@@ -35,14 +36,8 @@ export const initCommand = new Command("init")
     "--no-split-changelog",
     "Don't use split changelog (use single CHANGELOG.md file)"
   )
-  .option(
-    "-l, --lint-staged",
-    "Set up lint-staged for pre-commit hooks"
-  )
-  .option(
-    "--no-lint-staged",
-    "Don't set up lint-staged"
-  )
+  .option("-l, --lint-staged", "Set up lint-staged for pre-commit hooks")
+  .option("--no-lint-staged", "Don't set up lint-staged")
   .option(
     "--prettier-method <method>",
     "How to format code with Prettier (eslint or pretty-quick)"
@@ -51,10 +46,7 @@ export const initCommand = new Command("init")
     "--issue-url-format <format>",
     "Custom issue tracker URL format (e.g., https://linear.app/team/issue/{{prefix}}{{id}})"
   )
-  .option(
-    "--issue-prefix <prefix>",
-    "Custom issue prefix (e.g., PROJ-, TEAM-)"
-  )
+  .option("--issue-prefix <prefix>", "Custom issue prefix (e.g., PROJ-, TEAM-)")
   .action(async (options: InitOptions) => {
     await runInit(options);
   });
@@ -77,14 +69,14 @@ async function runInit(options: InitOptions): Promise<void> {
   // Build dependency list based on configuration
   const baseDeps = getBaseDependencies();
   const remarkDeps = config.useSplitChangelog ? getRemarkDependencies() : [];
-  
+
   let lintingDeps: string[] = [];
   if (config.useLintStaged && config.prettierMethod) {
     lintingDeps = [
       ...getLintStagedDependencies(),
       ...getPrettierDependencies(config.prettierMethod),
     ];
-    
+
     // Only add ESLint dependencies if no existing config or force mode
     if (!skipEslint || config.force) {
       lintingDeps = [...lintingDeps, ...getEslintDependencies()];
@@ -151,7 +143,7 @@ function displaySuccessMessage(config: InitConfig): void {
       "\n🎉 All done! Your project is ready for automated releases!\n"
     )
   );
-  
+
   if (config.useLintStaged && config.prettierMethod) {
     console.log(chalk.cyan("✨ Lint-staged has been configured with:"));
     console.log(

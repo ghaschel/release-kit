@@ -94,6 +94,21 @@ export const updateCommand = new Command("update")
         await fs.writeFile(commitMsgPath, commitMsgContent);
         await fs.chmod(commitMsgPath, 0o755);
 
+        // Update pre-commit hook (if lint-staged is used)
+        if (prettierMethod) {
+          const preCommitPath = path.join(huskyDir, "pre-commit");
+          const preCommitContent = "# Pre-commit hook\nnpx lint-staged\n";
+          await fs.writeFile(preCommitPath, preCommitContent);
+          await fs.chmod(preCommitPath, 0o755);
+        }
+
+        // Update prepare-commit-msg hook for lowercase-commit-subject
+        const prepareCommitMsgPath = path.join(huskyDir, "prepare-commit-msg");
+        const prepareCommitMsgContent =
+          "node scripts/lowercase-commit-subject.mjs $1\n";
+        await fs.writeFile(prepareCommitMsgPath, prepareCommitMsgContent);
+        await fs.chmod(prepareCommitMsgPath, 0o755);
+
         copySpinner.info("Husky hooks updated!");
       }
 

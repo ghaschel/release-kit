@@ -1,11 +1,12 @@
-import { Command } from "commander";
 import chalk from "chalk";
+import { Command } from "commander";
+
 import type { InstallOptions } from "../types";
-import { gatherInstallConfig } from "./utils/prompts";
 import {
   getGlobalDependencies,
   installGlobalDependencies,
 } from "./utils/installers";
+import { gatherInstallConfig } from "./utils/prompts";
 
 export const installCommand = new Command("install")
   .description("Install global dependencies (commitizen)")

@@ -1,9 +1,12 @@
 import { execa } from "execa";
 import fs from "fs-extra";
 import path from "path";
+
 import type { PackageJson } from "../../types";
 
-export async function isGloballyInstalled(packageName: string): Promise<boolean> {
+export async function isGloballyInstalled(
+  packageName: string
+): Promise<boolean> {
   try {
     await execa(packageName, ["--version"]);
     return true;
@@ -41,7 +44,7 @@ export async function areTemplateFilesInstalled(): Promise<boolean> {
   const versionrcExists = await pathExists(".versionrc.js");
   const commitlintConfigExists = await pathExists("commitlint.config.js");
   const scriptsDir = await pathExists("scripts");
-  
+
   return versionrcExists && commitlintConfigExists && scriptsDir;
 }
 
@@ -78,20 +81,22 @@ export function getTemplateEslintConfigName(): string {
 export async function shouldSkipEslintSetup(): Promise<boolean> {
   const existingConfig = await findExistingEslintConfig();
   const templateName = getTemplateEslintConfigName();
-  
+
   // Skip ESLint setup if there's an existing config that doesn't match our template name
   return existingConfig !== null && existingConfig !== templateName;
 }
 
-export async function detectPrettierMethod(): Promise<"eslint" | "pretty-quick" | null> {
+export async function detectPrettierMethod(): Promise<
+  "eslint" | "pretty-quick" | null
+> {
   const lintStagedPath = path.resolve(".lintstagedrc.json");
-  
+
   // First, try to detect from existing .lintstagedrc.json
   if (await pathExists(".lintstagedrc.json")) {
     try {
       const content = await fs.readFile(lintStagedPath, "utf-8");
       const config = JSON.parse(content);
-      
+
       // Check if pretty-quick is in the config
       for (const commands of Object.values(config)) {
         if (Array.isArray(commands)) {
@@ -102,33 +107,32 @@ export async function detectPrettierMethod(): Promise<"eslint" | "pretty-quick" 
           }
         }
       }
-      
+
       // Default to eslint method if lint-staged exists but no pretty-quick found
       return "eslint";
     } catch {
       // Fall through to check package.json
     }
   }
-  
+
   // If no .lintstagedrc.json, check if lint-staged is installed
   try {
     const pkgJson = await readPackageJson();
-    const hasLintStaged = 
+    const hasLintStaged =
       pkgJson.devDependencies?.["lint-staged"] !== undefined ||
       pkgJson.dependencies?.["lint-staged"] !== undefined;
-    
+
     if (!hasLintStaged) {
       return null;
     }
-    
+
     // Check if pretty-quick is installed
-    const hasPrettyQuick = 
+    const hasPrettyQuick =
       pkgJson.devDependencies?.["pretty-quick"] !== undefined ||
       pkgJson.dependencies?.["pretty-quick"] !== undefined;
-    
+
     return hasPrettyQuick ? "pretty-quick" : "eslint";
   } catch {
     return null;
   }
 }
-

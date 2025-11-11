@@ -49,6 +49,14 @@ export async function setupHusky(
     await fs.writeFile(commitMsgPath, commitMsgContent);
     await fs.chmod(commitMsgPath, 0o755); // Make executable
 
+    // Create prepare-commit-msg hook for lowercase-commit-subject
+    const prepareCommitMsgPath = path.join(huskyDir, "prepare-commit-msg");
+    const prepareCommitMsgContent =
+      "node scripts/lowercase-commit-subject.mjs $1\n";
+
+    await fs.writeFile(prepareCommitMsgPath, prepareCommitMsgContent);
+    await fs.chmod(prepareCommitMsgPath, 0o755); // Make executable
+
     huskySpinner.succeed("Husky initialized!");
   } catch (err) {
     huskySpinner.fail("Failed to setup Husky");

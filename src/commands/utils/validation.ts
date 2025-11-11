@@ -1,4 +1,5 @@
 import chalk from "chalk";
+
 import type { PackageManager, PrettierMethod } from "../../types";
 
 const VALID_PACKAGE_MANAGERS: PackageManager[] = ["npm", "yarn", "pnpm"];
@@ -44,7 +45,8 @@ export function validatePrettierMethod(
   return normalized as PrettierMethod;
 }
 
-export function isValidPrettierMethod(method: string): method is PrettierMethod {
+export function isValidPrettierMethod(
+  method: string
+): method is PrettierMethod {
   return VALID_PRETTIER_METHODS.includes(method as PrettierMethod);
 }
-

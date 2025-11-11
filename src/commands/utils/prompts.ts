@@ -1,11 +1,12 @@
 import inquirer, { type DistinctQuestion } from "inquirer";
+
 import type {
+  InitConfig,
+  InitOptions,
+  InstallConfig,
+  InstallOptions,
   PackageManager,
   PrettierMethod,
-  InitOptions,
-  InitConfig,
-  InstallOptions,
-  InstallConfig,
 } from "../../types";
 import { validatePackageManager, validatePrettierMethod } from "./validation";
 

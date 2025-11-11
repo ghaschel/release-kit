@@ -49,6 +49,7 @@ export default [
       "*.config.mjs",
       "scripts/split-changelog.mjs",
       "scripts/custom-tag-message.mjs",
+      "scripts/lowercase-commit-subject.mjs",
       "templates/**",
     ],
   },

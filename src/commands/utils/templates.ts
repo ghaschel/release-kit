@@ -1,7 +1,8 @@
-import ora from "ora";
 import chalk from "chalk";
 import fs from "fs-extra";
+import ora from "ora";
 import path from "path";
+
 import type { PrettierMethod } from "../../types";
 import {
   areTemplateFilesInstalled,
@@ -43,15 +44,33 @@ export async function copyTemplateFiles(
       { overwrite: force }
     );
 
-    // Copy split changelog scripts if enabled
+    // Always copy base scripts (lowercase-commit-subject, custom-tag-message)
+    const scriptsDir = path.join(process.cwd(), "scripts");
+    await fs.ensureDir(scriptsDir);
+
+    // Copy lowercase-commit-subject.mjs (always needed for prepare-commit-msg hook)
+    await fs.copy(
+      path.join(templatesDir, "scripts", "lowercase-commit-subject.mjs"),
+      path.join(scriptsDir, "lowercase-commit-subject.mjs"),
+      { overwrite: force }
+    );
+
+    // Copy custom-tag-message.mjs (always needed for posttag hook)
+    await fs.copy(
+      path.join(templatesDir, "scripts", "custom-tag-message.mjs"),
+      path.join(scriptsDir, "custom-tag-message.mjs"),
+      { overwrite: force }
+    );
+
+    // Copy split-changelog.mjs only if split changelog is enabled
     if (useSplitChangelog) {
       await fs.copy(
-        path.join(templatesDir, "scripts"),
-        path.join(process.cwd(), "scripts"),
+        path.join(templatesDir, "scripts", "split-changelog.mjs"),
+        path.join(scriptsDir, "split-changelog.mjs"),
         { overwrite: force }
       );
     } else {
-      await removeSpitChangelogFiles();
+      await removeSplitChangelogScript();
     }
 
     // Copy lint-staged config if enabled
@@ -118,23 +137,29 @@ async function copyEslintConfig(force: boolean): Promise<void> {
   await fs.copy(sourcePath, targetPath, { overwrite: force });
 }
 
-async function removeSpitChangelogFiles(): Promise<void> {
-  // Remove scripts directory
-  const scriptsPath = path.resolve("scripts");
-  if (await fs.pathExists(scriptsPath)) {
-    await fs.remove(scriptsPath);
+async function removeSplitChangelogScript(): Promise<void> {
+  // Remove only the split-changelog.mjs file
+  const splitChangelogPath = path.resolve("scripts", "split-changelog.mjs");
+  if (await fs.pathExists(splitChangelogPath)) {
+    await fs.remove(splitChangelogPath);
   }
 
-  // Update .versionrc.js to remove split-changelog hook
+  // Update .versionrc.js to remove split-changelog hook from postcommit
   const versionrcPath = path.resolve(".versionrc.js");
   if (await fs.pathExists(versionrcPath)) {
-    const versionrcContent = `module.exports = {
-  skip: { tag: false },
-  infile: "CHANGELOG.md",
-  header: "# Changelog\\n\\n",
-};
-`;
-    await fs.writeFile(versionrcPath, versionrcContent);
+    let content = await fs.readFile(versionrcPath, "utf-8");
+
+    // Remove the postcommit hook that runs split-changelog
+    content = content.replace(
+      /\s*postcommit:\s*"node scripts\/split-changelog\.mjs",?\s*/g,
+      ""
+    );
+
+    // Clean up empty scripts object
+    content = content.replace(/scripts:\s*\{\s*\}/g, "");
+    content = content.replace(/scripts:\s*\{\s*,/g, "scripts: {");
+
+    await fs.writeFile(versionrcPath, content);
   }
 }
 
